@@ -5,6 +5,12 @@
 #include <iostream>
 #include <string>
 
+struct Vector {
+	float x;
+	float y;
+	float z;
+};
+
 static constexpr int errorUsage = 1;
 static constexpr int errorFileIO = 2;
 static constexpr int errorInvalidFileHeader = 3;
@@ -84,6 +90,13 @@ static inline int convertFile(std::filesystem::path& path) {
 	}
 
 	{
+		Vector position;
+		input.read(reinterpret_cast<char*>(&position), sizeof(position));
+		std::cout << "Position: (" << position.x << ", " << position.y << ", "
+		          << position.z << ")\n";
+	}
+
+	{
 		uint8_t reasonLength;
 		input.read(reinterpret_cast<char*>(&reasonLength), sizeof(reasonLength));
 		std::cout << "Reason length: " << (int)reasonLength << '\n';
@@ -117,12 +130,22 @@ static inline int convertFile(std::filesystem::path& path) {
 		input.read(reinterpret_cast<char*>(&phoneNumber), sizeof(phoneNumber));
 		std::cout << " - Phone number: " << phoneNumber << '\n';
 
+		Vector position;
+		input.read(reinterpret_cast<char*>(&position), sizeof(position));
+		std::cout << " - Position: (" << position.x << ", " << position.y << ", "
+		          << position.z << ")\n";
+
+		double distance;
+		input.read(reinterpret_cast<char*>(&distance), sizeof(distance));
+		std::cout << " - Distance: " << distance << '\n';
+
 		uint16_t numFrames;
 		input.read(reinterpret_cast<char*>(&numFrames), sizeof(numFrames));
 		std::cout << " - Num frames: " << numFrames << '\n';
 
 		std::filesystem::path voicePath =
-		    stem / (std::to_string(phoneNumber) + ".wav");
+		    stem / (std::to_string(phoneNumber) + '_' +
+		            std::to_string((int)distance) + ".wav");
 
 		std::cout << " - Output path: " << voicePath << '\n';
 
